@@ -10,7 +10,7 @@ This project adds right-click context menu options in Windows for compressing im
 ## Features
 
 - Adds context menu options for compressing images and videos.
-- Supports a variety of file formats including `.jpg`, `.png`, `.mp4`, `.mov`, `.wav`, `.avi`, and `.webp`.
+- Supports a variety of file formats including `.jpg`, `.jpeg`, `.png`, `.mp4`, `.mov`, `.wav`, `.avi`, and `.webp`.
 - Utilizes FFmpeg for compression.
 
 ## Requirements
@@ -23,7 +23,7 @@ This project adds right-click context menu options in Windows for compressing im
 
 1. Clone or download the repository to your local machine.
 2. Ensure [FFmpeg](FFMPEG.md) is installed and added to your system PATH.
-3. Run `install.bat` as an administrator to add the context menu options.
+3. Run `install.bat` to add the context menu options.
    - This will create registry entries for the context menu options.
 4. (Optional) Run `uninstall.bat` as an administrator to remove the context menu options if needed.
 
