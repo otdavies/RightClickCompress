@@ -16,9 +16,10 @@ def remove_subkeys(key):
 
 
 def remove_registry_entries():
-    file_types = ['.jpg', '.png', '.mp4', '.mov', '.wav', '.avi', '.webp']
+    file_types = ['.jpg', '.jpeg', '.png',
+                  '.mp4', '.mov', '.wav', '.avi', '.webp']
     keys = [
-        f'SystemFileAssociations\\{file_type}\\shell\\Compress' for file_type in file_types]
+        f'SystemFileAssociations\\{file_type}\\shell\\Compress File' for file_type in file_types]
 
     confirmation = input(
         "This will remove certain registry entries. Are you sure? (yes/no): ")

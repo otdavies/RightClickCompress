@@ -3,6 +3,8 @@ import os
 import sys
 import winreg as reg
 
+# Note admin is only needed to add right click commands to the registry
+
 
 def is_admin():
     try:
@@ -18,7 +20,8 @@ def run_as_admin():
 
 def add_registry_entries():
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    file_types = ['.jpg', '.png', '.mp4', '.mov', '.wav', '.avi', '.webp']
+    file_types = ['.jpg', '.jpeg', '.png',
+                  '.mp4', '.mov', '.wav', '.avi', '.webp']
 
     for file_type in file_types:
         # Set the command for the 'Compress' option
@@ -39,7 +42,6 @@ def add_registry_entries():
 def main():
     # Check if the program is running with admin rights
     if not is_admin():
-        print("The script is not running with admin rights. Trying to get admin rights...")
         # Try to elevate privileges
         run_as_admin()
     else:

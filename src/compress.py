@@ -1,7 +1,18 @@
 import logging
 import os
 import argparse
-import subprocess  # to call ffmpeg
+import subprocess  # to call ffmpeg and install pillow if needed
+
+try:
+    from PIL import Image
+except ImportError:
+    print("oh no! Pillow (a python image library) not found, installing... (this may take a moment!)")
+    try:
+        subprocess.run(['pip', 'install', 'Pillow'], check=True)
+        from PIL import Image
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to install Pillow: {e}")
+        exit(1)  # Exit the script if Pillow installation fails
 
 
 def compress_file(file_path):
@@ -9,13 +20,24 @@ def compress_file(file_path):
     output_path = file_path.replace(f'.{file_ext}', f'_compressed.{file_ext}')
     ffmpeg_command = []
 
-    if file_ext in ['jpg', 'jpeg', 'png']:
-        ffmpeg_command = [
-            'ffmpeg',
-            '-i', file_path,
-            '-q:v', '2',  # High quality compression
-            output_path
-        ]
+    if file_ext in ['jpg', 'jpeg']:
+        try:
+            with Image.open(file_path) as img:
+                # Adjust quality for compression
+                img.save(output_path, quality=60, optimize=True)
+        except Exception as e:
+            logging.error(f'Error during JPEG compression: {e}')
+            return
+    elif file_ext == 'png':
+        try:
+            with Image.open(file_path) as img:
+                # Updated palette parameter
+                img = img.convert('RGBA', palette=1, colors=256)
+                # Specify format='PNG'
+                img.save(output_path, optimize=True, format='PNG')
+        except Exception as e:
+            logging.error(f'Error during PNG compression: {e}')
+            return
     elif file_ext in ['mp4', 'mov', 'wav', 'avi', 'webp']:
         # Output always in mp4 format for these types
         output_path = file_path.replace(f'.{file_ext}', f'_compressed.mp4')
@@ -30,11 +52,12 @@ def compress_file(file_path):
         logging.error(f'Unsupported file type: {file_ext}')
         return
 
-    try:
-        subprocess.run(ffmpeg_command, check=True)
-        logging.info(f'Compression successful: {output_path}')
-    except subprocess.CalledProcessError as e:
-        logging.error(f'Error during compression: {e}')
+    if ffmpeg_command:
+        try:
+            subprocess.run(ffmpeg_command, check=True)
+            logging.info(f'Compression successful: {output_path}')
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during compression: {e}')
 
 
 if __name__ == '__main__':
