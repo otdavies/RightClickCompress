@@ -2,6 +2,12 @@
 
 This guide walks through the steps to install FFmpeg on a Windows machine.
 
+# Automatic Installation
+## 1. Run `attempt_ffmpeg_install.bat`.
+## 2. Pray. If it works, great! If not, continue to the manual installation steps below.
+
+
+# Manual Installation
 ## 1. Download FFmpeg
 
 - Download the FFmpeg executable from the official website:

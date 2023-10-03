@@ -31,9 +31,14 @@ def compress_file(file_path):
     elif file_ext == 'png':
         try:
             with Image.open(file_path) as img:
-                # Updated palette parameter
-                img = img.convert('RGBA', palette=1, colors=256)
-                # Specify format='PNG'
+                # Check if the png uses the alpha channel
+                if img.mode == 'RGBA':
+                    img = img.convert(
+                        'RGBA', colors=256, dither=Image.Dither.FLOYDSTEINBERG)
+                else:
+                    img = img.convert(
+                        'RGB', colors=256, dither=Image.Dither.FLOYDSTEINBERG)
+
                 img.save(output_path, optimize=True, format='PNG')
         except Exception as e:
             logging.error(f'Error during PNG compression: {e}')
