@@ -6,7 +6,7 @@ import subprocess  # to call ffmpeg and install pillow if needed
 try:
     from PIL import Image
 except ImportError:
-    print("oh no! Pillow (a python image library) not found, installing... (this may take a moment!)")
+    print("oh no! Pillow (python image library) not found, installing... (this may take a moment!)")
     try:
         subprocess.run(['pip', 'install', 'Pillow'], check=True)
         from PIL import Image
