@@ -7,7 +7,7 @@ https://github.com/otdavies/RightClickCompress/assets/3145170/75359f65-21fe-4447
 
 This project adds right-click context menu options in Windows for compressing images and videos without significant loss in visual quality. 
 
-Note: In some cases (especially with .png) the image may not reduce in size if it has already been compressed.
+Note: In some cases (especially with .png) the image may not reduce in size if it was compressed prior.
 
 ## Features
 
