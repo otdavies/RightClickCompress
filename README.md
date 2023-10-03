@@ -22,7 +22,7 @@ This project adds right-click context menu options in Windows for compressing im
 ## Installation
 
 1. Clone or download the repository to your local machine.
-2. Ensure FFmpeg is installed and added to your system PATH.
+2. Ensure [FFmpeg](FFMPEG.md) is installed and added to your system PATH.
 3. Run `install.bat` as an administrator to add the context menu options.
    - This will create registry entries for the context menu options.
 4. (Optional) Run `uninstall.bat` as an administrator to remove the context menu options if needed.
