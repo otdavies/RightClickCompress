@@ -1,4 +1,9 @@
 # Right Click Compress
+![explorer_JJ2bMnfl24](https://github.com/otdavies/RightClickCompress/assets/3145170/7a55ed7d-e930-414d-9b7b-0acab83c6520)
+-----
+
+https://github.com/otdavies/RightClickCompress/assets/3145170/75359f65-21fe-4447-a973-295419db7f1f
+
 
 This project adds right-click context menu options in Windows for compressing images and videos without significant loss in visual quality.
 
