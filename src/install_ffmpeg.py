@@ -4,10 +4,19 @@ import zipfile
 import urllib.request
 import subprocess
 import ctypes
+from pathlib import Path
 
-# FFMpeg mirror URL, adjust to your preferred FFmpeg mirror link
+def ensure_tqdm():
+    try:
+        from tqdm import tqdm
+        return tqdm
+    except ImportError:
+        print("Installing required dependency...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "tqdm", "--quiet"])
+        from tqdm import tqdm
+        return tqdm
+
 FFMPEG_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-
 
 def is_admin():
     try:
@@ -15,66 +24,79 @@ def is_admin():
     except:
         return False
 
-
 def run_as_admin():
     ctypes.windll.shell32.ShellExecuteW(
         None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
-
 def download_ffmpeg():
+    tqdm = ensure_tqdm()
     local_filename = "ffmpeg.zip"
-    with urllib.request.urlopen(FFMPEG_URL) as response, open(local_filename, 'wb') as out_file:
-        data = response.read()
-        out_file.write(data)
+    
+    response = urllib.request.urlopen(FFMPEG_URL)
+    total_size = int(response.headers.get('content-length', 0))
+    
+    with tqdm(total=total_size, unit='B', unit_scale=True, desc="Downloading FFmpeg") as pbar:
+        with open(local_filename, 'wb') as out_file:
+            while True:
+                buffer = response.read(8192)
+                if not buffer:
+                    break
+                out_file.write(buffer)
+                pbar.update(len(buffer))
+    
     return local_filename
 
-
 def extract_ffmpeg(zip_filepath):
+    tqdm = ensure_tqdm()
     with zipfile.ZipFile(zip_filepath, 'r') as zip_ref:
-        zip_ref.extractall(".")
-    # Get the name of the folder extracted, the first folder with an ffmpeg.exe file
-    ffmpeg_dir = next((folder for folder in os.listdir(
-        os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), folder, "bin", "ffmpeg.exe"))), None)
-    # Add bin to the path
-    folder_name = os.path.join(ffmpeg_dir, "bin")
-    # Return the full path to the bin folder
-    return os.path.join(os.getcwd(), folder_name)
-
+        total_size = sum(file.file_size for file in zip_ref.filelist)
+        extracted_size = 0
+        
+        with tqdm(total=total_size, unit='B', unit_scale=True, desc="Extracting FFmpeg") as pbar:
+            for file in zip_ref.filelist:
+                zip_ref.extract(file)
+                extracted_size += file.file_size
+                pbar.update(file.file_size)
+    
+    absolute_path = Path(os.getcwd()).resolve()
+    ffmpeg_dir = next((folder for folder in os.listdir(absolute_path)
+                      if os.path.isfile(os.path.join(absolute_path, folder, "bin", "ffmpeg.exe"))), None)
+    
+    if not ffmpeg_dir:
+        raise FileNotFoundError("Could not find FFmpeg directory after extraction")
+    
+    bin_path = os.path.join(absolute_path, ffmpeg_dir, "bin")
+    return str(Path(bin_path).resolve())
 
 def add_to_path(directory):
-    # Get the current PATH
-    path = os.environ.get("PATH", "")
-    # Check if the directory is already in the PATH
-    if directory not in path:
-        # Add the directory to the PATH
-        print("Adding to PATH: " + f'{path};{directory}')
-        subprocess.run(['setx', 'PATH', f'{path};{directory}'], check=True)
-
+    current_path = os.environ.get("PATH", "")
+    paths = current_path.split(os.pathsep)
+    
+    if directory not in paths:
+        new_path = os.pathsep.join([current_path, directory])
+        print(f"Adding to PATH: {directory}")
+        subprocess.run(['setx', 'PATH', new_path], check=True)
+        os.environ["PATH"] = new_path
 
 def main():
-    # Check if FFmpeg is already installed
     ffmpeg_installed = subprocess.run(
         ["where", "ffmpeg"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        
     if not ffmpeg_installed:
         if not is_admin():
-            print("Didn't find FFmpeg, we need admin rights to install it.")
-            print("Requesting admin rights, this is just to install FFmpeg to your PATH.")
+            print("Requesting admin rights to install FFmpeg.")
             run_as_admin()
             return
 
-        print("FFmpeg not found, we are going to attempt to install FFMpeg for you. God help us.")
-        print(f"Downloading around ~100mb... this will take a moment.")
+        print("Installing FFmpeg...")
         zip_filepath = download_ffmpeg()
-        print("Download complete, extracting to " + os.getcwd() + zip_filepath)
         ffmpeg_dir = extract_ffmpeg(zip_filepath)
-        print("Extraction complete, adding to PATH...")
+        print(f"Adding to PATH: {ffmpeg_dir}")
         add_to_path(ffmpeg_dir)
-        print("FFMpeg is now installed, hopefully. No promises lol.")
-        # Delete .zip file
+        print("FFmpeg installation complete.")
         os.remove(zip_filepath)
     else:
-        print("FFmpeg is already installed, that was easy.")
-
+        print("FFmpeg is already installed.")
 
 if __name__ == "__main__":
     main()
